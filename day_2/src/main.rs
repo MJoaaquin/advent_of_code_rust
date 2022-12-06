@@ -43,6 +43,20 @@ fn main() {
                 (Self::Scissors, Self::Paper) => 0,
             }
         }
+
+        fn handshape_by_opponent_handshape(opponent: HandShape, my: &My) -> HandShape {
+            match (opponent, my) {
+                (HandShape::Rock, My::X) => HandShape::Scissors,
+                (HandShape::Paper, My::X) => HandShape::Rock,
+                (HandShape::Scissors, My::X) => HandShape::Paper,
+                (HandShape::Rock, My::Y) => HandShape::Rock,
+                (HandShape::Paper, My::Y) => HandShape::Paper,
+                (HandShape::Scissors, My::Y) => HandShape::Scissors,
+                (HandShape::Rock, My::Z) => HandShape::Paper,
+                (HandShape::Paper, My::Z) => HandShape::Scissors,
+                (HandShape::Scissors, My::Z) => HandShape::Rock,
+            }
+        }
     }
 
     impl Opponent {
@@ -65,12 +79,16 @@ fn main() {
     }
 
     impl My {
-        fn handshape(&self) -> HandShape {
+        fn handshape_for_part_1(&self) -> HandShape {
             match self {
                 Self::X => HandShape::Rock,
                 Self::Y => HandShape::Paper,
                 Self::Z => HandShape::Scissors,
             }
+        }
+
+        fn handshape_for_part_2(&self, opponent_handshape: HandShape) -> HandShape {
+            HandShape::handshape_by_opponent_handshape(opponent_handshape, self)
         }
 
         fn to_variant(string: &str) -> My {
@@ -101,17 +119,30 @@ fn main() {
             .collect::<Vec<(Opponent, My)>>()
     }
 
-    fn calculate_round_score(round: &(Opponent, My)) -> u64 {
+    fn calculate_round_score_part_1(round: &(Opponent, My)) -> u64 {
         let (opponent, my) = round;
-        HandShape::outcome_of_the_round(opponent.handshape(), my.handshape())
-            + my.handshape().score()
+        HandShape::outcome_of_the_round(opponent.handshape(), my.handshape_for_part_1())
+            + my.handshape_for_part_1().score()
+    }
+
+    fn calculate_round_score_part_2(round: &(Opponent, My)) -> u64 {
+        let (opponent, my) = round;
+        let my_handshape = my.handshape_for_part_2(opponent.handshape());
+        let my_handshape_score = &my_handshape.score();
+        HandShape::outcome_of_the_round(opponent.handshape(), my_handshape) + my_handshape_score
     }
 
     let rounds = get_rounds_results("./src/source.txt");
-    let result: u64 = rounds
+    let result_part_1: u64 = rounds
         .iter()
-        .map(|round| calculate_round_score(round))
+        .map(|round| calculate_round_score_part_1(round))
         .sum();
 
-    println!("your score: {}", result)
+    let result_part_2: u64 = rounds
+        .iter()
+        .map(|round| calculate_round_score_part_2(round))
+        .sum();
+
+    println!("your score: {}", result_part_1);
+    println!("your score: {}", result_part_2);
 }
