@@ -1,10 +1,14 @@
+use std::fs;
+
 fn main() {
+    #[derive(Debug)]
     enum Opponent {
         A,
         B,
         C,
     }
 
+    #[derive(Debug)]
     enum My {
         Y,
         X,
@@ -18,7 +22,7 @@ fn main() {
     }
 
     impl HandShape {
-        fn score(&self) -> u8 {
+        fn score(&self) -> u64 {
             match self {
                 Self::Rock => 1,
                 Self::Paper => 2,
@@ -26,7 +30,7 @@ fn main() {
             }
         }
 
-        fn outcome_of_the_round(opponent: HandShape, my: HandShape) -> u8 {
+        fn outcome_of_the_round(opponent: HandShape, my: HandShape) -> u64 {
             match (opponent, my) {
                 (Self::Rock, Self::Rock) => 3,
                 (Self::Paper, Self::Paper) => 3,
@@ -79,21 +83,35 @@ fn main() {
         }
     }
 
-    fn calculate() {
-        // let my_choices = vec![My::Y, My::X, My::Z];
-        // let opponent_choices = vec![Opponent::A, Opponent::B, Opponent::C];
+    fn get_rounds_results(source_path: &str) -> Vec<(Opponent, My)> {
+        let file_content = fs::read_to_string(source_path).unwrap();
+        let vec_of_rounds: Vec<Vec<&str>> = file_content
+            .split("\n")
+            .map(|str| str.split(" ").collect())
+            .collect();
 
-        let round_1 = HandShape::outcome_of_the_round(Opponent::A.handshape(), My::X.handshape())
-            + My::X.handshape().score();
-
-        let round_2 = HandShape::outcome_of_the_round(Opponent::B.handshape(), My::Y.handshape())
-            + My::Y.handshape().score();
-
-        let round_3 = HandShape::outcome_of_the_round(Opponent::C.handshape(), My::Z.handshape())
-            + My::Z.handshape().score();
-
-        println!("{}", round_1 + round_2 + round_3)
+        vec_of_rounds
+            .iter()
+            .map(|values| {
+                (
+                    Opponent::to_variant(values.first().unwrap()),
+                    My::to_variant(values.last().unwrap()),
+                )
+            })
+            .collect::<Vec<(Opponent, My)>>()
     }
 
-    calculate()
+    fn calculate_round_score(round: &(Opponent, My)) -> u64 {
+        let (opponent, my) = round;
+        HandShape::outcome_of_the_round(opponent.handshape(), my.handshape())
+            + my.handshape().score()
+    }
+
+    let rounds = get_rounds_results("./src/source.txt");
+    let result: u64 = rounds
+        .iter()
+        .map(|round| calculate_round_score(round))
+        .sum();
+
+    println!("your score: {}", result)
 }
