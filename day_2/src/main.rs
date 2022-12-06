@@ -44,7 +44,7 @@ fn main() {
             }
         }
 
-        fn handshape_by_opponent_handshape(opponent: HandShape, my: &My) -> HandShape {
+        fn handshape_depend_on_opponent_handshape(opponent: HandShape, my: &My) -> HandShape {
             match (opponent, my) {
                 (HandShape::Rock, My::X) => HandShape::Scissors,
                 (HandShape::Paper, My::X) => HandShape::Rock,
@@ -88,7 +88,7 @@ fn main() {
         }
 
         fn handshape_for_part_2(&self, opponent_handshape: HandShape) -> HandShape {
-            HandShape::handshape_by_opponent_handshape(opponent_handshape, self)
+            HandShape::handshape_depend_on_opponent_handshape(opponent_handshape, self)
         }
 
         fn to_variant(string: &str) -> My {
