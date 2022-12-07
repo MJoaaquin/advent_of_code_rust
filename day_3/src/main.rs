@@ -1,6 +1,6 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, fs};
 
-fn calculate(character: &str) -> u8 {
+fn calculate(character: &str) -> u32 {
     match character {
         "a" => 1,
         "b" => 2,
@@ -59,35 +59,39 @@ fn calculate(character: &str) -> u8 {
 }
 
 fn main() {
-    let rucksacks_content = "vJrwpWtwJgWrhcsFMMfFFhFp".to_string();
+    let source_path = "./src/source.txt";
+    let file_content = fs::read_to_string(source_path).unwrap();
 
-    let mid = rucksacks_content.chars().count() / 2;
+    let rucksacks_list: Vec<&str> = file_content.split("\n").collect();
 
-    let mut appearances_of_characters: HashMap<String, u8> = HashMap::new();
+    let mut general_result: u32 = 0;
 
-    let (first_part, second_part) = rucksacks_content.split_at(mid);
+    for rucksack_content in rucksacks_list {
+        let mut appearances_of_characters: HashMap<String, u32> = HashMap::new();
 
-    for char in first_part.to_string().chars() {
-        appearances_of_characters.insert(char.to_string(), 0);
-    }
+        let mid = rucksack_content.chars().count() / 2;
+        let (first_part, second_part) = rucksack_content.split_at(mid);
 
-    println!("a: {:?}", appearances_of_characters);
-
-    for char in second_part.to_string().chars() {
-        if let Some(value) = appearances_of_characters.get_mut(&char.to_string()) {
-            *value += 1;
+        for char in first_part.to_string().chars() {
+            appearances_of_characters.insert(char.to_string(), 0);
         }
-    }
 
-    println!("b: {:?}", appearances_of_characters);
-
-    let mut result: u8 = 0;
-
-    for (key, value) in appearances_of_characters {
-        if value > 0 {
-            result = result + calculate(key.as_str())
+        for char in second_part.to_string().chars() {
+            if let Some(value) = appearances_of_characters.get_mut(&char.to_string()) {
+                *value += 1;
+            }
         }
+
+        let mut result: u32 = 0;
+
+        for (key, value) in appearances_of_characters {
+            if value > 0 {
+                result = result + calculate(key.as_str())
+            }
+        }
+
+        general_result = general_result + result
     }
 
-    println!("{}", result);
+    println!("general result: {}", general_result)
 }
